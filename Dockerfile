@@ -3,12 +3,11 @@
 ###########################################################
 FROM steamcmd/steamcmd:latest
 
-ENV SCRIPTSDIR "/opt/scripts"
-ENV DATADIR "/data"
+ENV MAINDIR "/opt"
+ENV SERVERDIR "${MAINDIR}/server"
+ENV DATADIR "${MAINDIR}/data"
 
-RUN mkdir "${SCRIPTSDIR}"
-
-COPY ./startup.sh ${SCRIPTSDIR}/startup.sh
+COPY ./startup.sh ${MAINDIR}/startup.sh
 
 RUN dpkg --add-architecture i386
 
@@ -20,8 +19,9 @@ RUN set -x \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends --no-install-suggests \
 	xvfb mesa-utils libx32gcc-s1 lib32gcc-s1 build-essential libxi6 x11-utils \
+	&& mkdir -p "${SERVERDIR}" \
 	&& mkdir -p "${DATADIR}" \
-	&& chmod +x "${SCRIPTSDIR}/startup.sh" \
+	&& chmod +x "${MAINDIR}/startup.sh" \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /tmp/.X11-unix
@@ -36,4 +36,7 @@ ENV WORLD_INDEX=0 \
 	SERVER_IP="" \
     SERVER_PORT=""
 
-CMD ["bash", "${SCRIPTSDIR}/startup.sh"]
+VOLUME ${SERVERDIR}
+VOLUME ${DATADIR}
+
+CMD ["bash", "${MAINDIR}/startup.sh"]

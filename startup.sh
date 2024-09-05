@@ -1,13 +1,11 @@
 #!/bin/bash
-bash "steamcmd +force_install_dir ${DATADIR} +login anonymous +app_update 1007 validate +app_update 1963720 validate +quit"
+bash "steamcmd +force_install_dir ${SERVERDIR} +login anonymous +app_update 1007 validate +app_update 1963720 validate +quit"
 
 # Switch to workdir
-cd "${DATADIR}"
+cd "${SERVERDIR}"
 
 xvfbpid=""
 ckpid=""
-requirements=( "libxi6" "xvfb" )
-sudo="sudo" && [[ $(id -u) == 0 ]] && sudo=""
 
 function kill_corekeeperserver {
         if [[ ! -z "$ckpid" ]]; then
@@ -21,16 +19,6 @@ function kill_corekeeperserver {
 }
 
 trap kill_corekeeperserver EXIT
-
-for r in "${requirements[@]}"
-do
-        echo "Checking for required package: $r"
-        if ! (dpkg -l $r >/dev/null); then
-                echo "Installing missing package: $r"
-                sleep 1
-                $sudo apt-get update -yy && $sudo apt-get install -yy "$r"
-        fi
-done
 
 set -m
 
@@ -62,7 +50,7 @@ chmod +x ./CoreKeeperServer
 
 #Build Parameters
 declare -a params
-params=(-batchmode -logfile "CoreKeeperServerLog.txt")
+params=(-batchmode -logfile "CoreKeeperServerLog.txt" -datapath "${DATADIR}")
 if [ ! -z "${WORLD_INDEX}" ]; then params=( "${params[@]}" -world "${WORLD_INDEX}" ); fi
 if [ ! -z "${WORLD_NAME}" ]; then params=( "${params[@]}" -worldname "${WORLD_NAME}" ); fi
 if [ ! -z "${WORLD_SEED}" ]; then params=( "${params[@]}" -worldseed "${WORLD_SEED}" ); fi
