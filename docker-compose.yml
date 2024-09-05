@@ -2,12 +2,18 @@ version: "3"
 
 services:
   core-keeper:
+    build:
+      context: .
+      args:
+        - PUID=${PUID}
     image: escaping/core-keeper-dedicated
     volumes:
       - server-files:/home/steam/core-keeper-dedicated
       - server-data:/home/steam/core-keeper-data
-    env_file:
-      - ./core.env
+    environment:
+      - GAME_ID=${GAME_ID}
+      - MAX_PLAYERS=${MAX_PLAYERS:-8}
+      - WORLD_NAME=${WORLD_NAME:-Synbase}
     restart: always
     stop_grace_period: 2m
 volumes:

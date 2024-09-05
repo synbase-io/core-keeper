@@ -21,7 +21,7 @@ trap kill_corekeeperserver EXIT
 if ! (dpkg -l xvfb >/dev/null) ; then
     echo "Installing xvfb dependency..."
     sleep 1
-    apt-get update -yy && apt-get install xvfb -yy
+    sudo apt-get update -yy && sudo apt-get install xvfb -yy
 fi
 
 set -m

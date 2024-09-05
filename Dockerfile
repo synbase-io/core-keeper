@@ -5,16 +5,15 @@ FROM cm2network/steamcmd:root
 
 LABEL maintainer="leandro.martin@protonmail.com"
 
-ENV MAINDIR "/opt"
 ENV STEAMAPPID 1007
 ENV STEAMAPPID_TOOL 1963720
 ENV STEAMAPP core-keeper
-ENV STEAMAPPDIR "${MAINDIR}/server"
-ENV STEAMAPPDATADIR "${MAINDIR}/data"
+ENV STEAMAPPDIR "${HOMEDIR}/${STEAMAPP}-dedicated"
+ENV STEAMAPPDATADIR "${HOMEDIR}/${STEAMAPP}-data"
 ENV DLURL https://raw.githubusercontent.com/escapingnetwork/core-keeper-dedicated
 
-COPY ./entry.sh ${MAINDIR}/entry.sh
-COPY ./launch.sh ${MAINDIR}/launch.sh
+COPY ./entry.sh ${HOMEDIR}/entry.sh
+COPY ./launch.sh ${HOMEDIR}/launch.sh
 
 RUN dpkg --add-architecture i386
 
@@ -28,9 +27,13 @@ RUN set -x \
 	xvfb mesa-utils libx32gcc-s1 lib32gcc-s1 build-essential libxi6 x11-utils tini \
 	&& mkdir -p "${STEAMAPPDIR}" \
 	&& mkdir -p "${STEAMAPPDATADIR}" \
+	&& chmod +x "${HOMEDIR}/entry.sh" \
+	&& chmod +x "${HOMEDIR}/launch.sh" \
+	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${HOMEDIR}/launch.sh" "${STEAMAPPDIR}" "${STEAMAPPDATADIR}" \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /tmp/.X11-unix
+RUN mkdir /tmp/.X11-unix \
+	&& chown -R "${USER}:${USER}" /tmp/.X11-unix
 
 
 ENV WORLD_INDEX=0 \
@@ -44,8 +47,11 @@ ENV WORLD_INDEX=0 \
 	SERVER_IP="" \
     SERVER_PORT=""
 
+# Switch to user
+USER ${USER}
+
 # Switch to workdir
-WORKDIR ${MAINDIR}
+WORKDIR ${HOMEDIR}
 
 VOLUME ${STEAMAPPDIR}
 

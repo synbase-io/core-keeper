@@ -1,1 +1,0 @@
-docker run -it -v /srv/volumes/test:/data steamcmd/steamcmd:latest +force_install_dir /data +login anonymous +app_update 1007 validate +app_update 1963720 validate +quit

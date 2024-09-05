@@ -1,5 +1,5 @@
 #!/bin/bash
-mkdir -p "${STEAMAPPDIR}" || true
+mkdir -p "${STEAMAPPDIR}" || true  
 
 # Override SteamCMD launch arguments if necessary
 # Used for subscribing to betas or for testing
