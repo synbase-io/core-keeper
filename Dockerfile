@@ -65,6 +65,7 @@ RUN set -x \
 	&& mkdir -p "${STEAMAPPDATADIR}" \
 	&& chmod +x "${HOMEDIR}/entry.sh" \
 	&& chmod +x "${HOMEDIR}/launch.sh" \
+    && chown -R "root:root" "${HOMEDIR}/entry.sh" "${HOMEDIR}/launch.sh" "${STEAMAPPDIR}" "${STEAMAPPDATADIR}" \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /tmp/.X11-unix
