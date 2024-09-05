@@ -1,5 +1,5 @@
 #!/bin/bash
-bash "steamcmd +force_install_dir ${SERVERDIR} +login anonymous +app_update 1007 validate +app_update 1963720 validate +quit"
+bash "/usr/bin/steamcmd +force_install_dir ${SERVERDIR} +login anonymous +app_update 1007 validate +app_update 1963720 validate +quit"
 
 # Switch to workdir
 cd "${SERVERDIR}"
