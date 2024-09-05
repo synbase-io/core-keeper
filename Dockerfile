@@ -1,19 +1,14 @@
 ###########################################################
 # Dockerfile that builds a Core Keeper Gameserver
 ###########################################################
-FROM cm2network/steamcmd:root
+FROM steamcmd/steamcmd:latest
 
-LABEL maintainer="leandro.martin@protonmail.com"
+ENV SCRIPTSDIR "/opt/scripts"
+ENV DATADIR "/data"
 
-ENV STEAMAPPID 1007
-ENV STEAMAPPID_TOOL 1963720
-ENV STEAMAPP core-keeper
-ENV STEAMAPPDIR "${HOMEDIR}/${STEAMAPP}-dedicated"
-ENV STEAMAPPDATADIR "${HOMEDIR}/${STEAMAPP}-data"
-ENV DLURL https://raw.githubusercontent.com/escapingnetwork/core-keeper-dedicated
+RUN mkdir "${SCRIPTSDIR}"
 
-COPY ./entry.sh ${HOMEDIR}/entry.sh
-COPY ./launch.sh ${HOMEDIR}/launch.sh
+COPY ./startup.sh ${SCRIPTSDIR}/startup.sh
 
 RUN dpkg --add-architecture i386
 
@@ -24,38 +19,21 @@ RUN dpkg --add-architecture i386
 RUN set -x \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends --no-install-suggests \
-	xvfb mesa-utils libx32gcc-s1 lib32gcc-s1 build-essential libxi6 x11-utils tini \
-	&& mkdir -p "${STEAMAPPDIR}" \
-	&& mkdir -p "${STEAMAPPDATADIR}" \
-	&& chmod +x "${HOMEDIR}/entry.sh" \
-	&& chmod +x "${HOMEDIR}/launch.sh" \
-	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${HOMEDIR}/launch.sh" "${STEAMAPPDIR}" "${STEAMAPPDATADIR}" \
+	xvfb mesa-utils libx32gcc-s1 lib32gcc-s1 build-essential libxi6 x11-utils \
+	&& mkdir -p "${DATADIR}" \
+	&& chmod +x "${SCRIPTSDIR}/startup.sh" \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /tmp/.X11-unix \
-	&& chown -R "${USER}:${USER}" /tmp/.X11-unix
-
+RUN mkdir /tmp/.X11-unix
 
 ENV WORLD_INDEX=0 \
 	WORLD_NAME="Core Keeper Server" \
 	WORLD_SEED=0 \
 	WORLD_MODE=0 \
 	GAME_ID="" \
-	DATA_PATH="${STEAMAPPDATADIR}" \
 	MAX_PLAYERS=10 \
 	SEASON=-1 \
 	SERVER_IP="" \
     SERVER_PORT=""
 
-# Switch to user
-USER ${USER}
-
-# Switch to workdir
-WORKDIR ${HOMEDIR}
-
-VOLUME ${STEAMAPPDIR}
-
-# Use tini as the entrypoint for signal handling
-ENTRYPOINT ["/usr/bin/tini", "--"]
-
-CMD ["bash", "entry.sh"]
+CMD ["bash", "${SCRIPTSDIR}/startup.sh"]
