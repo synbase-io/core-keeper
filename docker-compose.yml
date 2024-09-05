@@ -8,11 +8,14 @@ services:
         - PUID=${PUID}
     image: escaping/core-keeper-dedicated
     volumes:
-      - /home/core-keeper/server:/home/steam/core-keeper-dedicated
-      - /home/core-keeper/data:/home/steam/core-keeper-data
+      - server:/home/steam/core-keeper-dedicated
+      - data:/home/steam/core-keeper-data
     environment:
       - GAME_ID=${GAME_ID}
       - MAX_PLAYERS=${MAX_PLAYERS:-8}
       - WORLD_NAME=${WORLD_NAME:-Synbase}
     restart: always
     stop_grace_period: 2m
+volumes:
+  server:
+  data:
