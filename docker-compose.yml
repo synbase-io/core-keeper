@@ -6,7 +6,6 @@ services:
       context: .
       args:
         - PUID=${PUID}
-    image: escaping/core-keeper-dedicated
     volumes:
       - server:/home/steam/core-keeper-dedicated
       - data:/home/steam/core-keeper-data
