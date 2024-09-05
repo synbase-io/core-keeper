@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        - PUID=${PUID}
+        - PUID=1003
     volumes:
       - server:/home/steam/core-keeper-dedicated
       - data:/home/steam/core-keeper-data
