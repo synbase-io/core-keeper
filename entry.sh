@@ -1,12 +1,6 @@
 #!/bin/bash
 mkdir -p "${STEAMAPPDIR}" || true
 
-# Fix ownership issue on Unraid
-echo "---Taking ownership of data...---"
-chown -R root:${GID} /opt/scripts
-chmod -R 750 /opt/scripts
-chown -R ${UID}:${GID} ${STEAMAPPDIR}
-
 # Override SteamCMD launch arguments if necessary
 # Used for subscribing to betas or for testing
 if [ -z "$STEAMCMD_UPDATE_ARGS" ]; then
