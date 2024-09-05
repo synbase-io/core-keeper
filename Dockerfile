@@ -4,7 +4,7 @@
 FROM debian:bookworm-slim as build_stage
 
 LABEL maintainer="walentinlamonos@gmail.com"
-ARG PUID=1000
+ARG PUID
 
 ENV USER steam
 ENV HOMEDIR "/home/${USER}"
