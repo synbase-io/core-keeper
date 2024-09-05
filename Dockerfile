@@ -3,11 +3,7 @@
 ############################################################
 FROM debian:bookworm-slim as build_stage
 
-LABEL maintainer="walentinlamonos@gmail.com"
-ARG PUID
-
-ENV USER steam
-ENV HOMEDIR "/home/${USER}"
+ENV HOMEDIR "/opt/core-keeper"
 ENV STEAMCMDDIR "${HOMEDIR}/steamcmd"
 
 RUN set -x \
@@ -22,40 +18,34 @@ RUN set -x \
 		locales=2.36-9+deb12u7 \
 	&& sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 	&& dpkg-reconfigure --frontend=noninteractive locales \
-	# Create unprivileged user
-	&& useradd -u "${PUID}" -m "${USER}" \
-	# Download SteamCMD, execute as user
-	&& su "${USER}" -c \
-		"mkdir -p \"${STEAMCMDDIR}\" \
-                && curl -fsSL 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar xvzf - -C \"${STEAMCMDDIR}\" \
-                && \"./${STEAMCMDDIR}/steamcmd.sh\" +quit \
-                && ln -s \"${STEAMCMDDIR}/linux32/steamclient.so\" \"${STEAMCMDDIR}/steamservice.so\" \
-                && mkdir -p \"${HOMEDIR}/.steam/sdk32\" \
-                && ln -s \"${STEAMCMDDIR}/linux32/steamclient.so\" \"${HOMEDIR}/.steam/sdk32/steamclient.so\" \
-                && ln -s \"${STEAMCMDDIR}/linux32/steamcmd\" \"${STEAMCMDDIR}/linux32/steam\" \
-                && mkdir -p \"${HOMEDIR}/.steam/sdk64\" \
-                && ln -s \"${STEAMCMDDIR}/linux64/steamclient.so\" \"${HOMEDIR}/.steam/sdk64/steamclient.so\" \
-                && ln -s \"${STEAMCMDDIR}/linux64/steamcmd\" \"${STEAMCMDDIR}/linux64/steam\" \
-                && ln -s \"${STEAMCMDDIR}/steamcmd.sh\" \"${STEAMCMDDIR}/steam.sh\"" \
+	# Download SteamCMD
+	&& mkdir -p "${STEAMCMDDIR}" \
+        && curl -fsSL 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar xvzf - -C \"${STEAMCMDDIR}\" \
+        && \"./${STEAMCMDDIR}/steamcmd.sh\" +quit \
+        && ln -s \"${STEAMCMDDIR}/linux32/steamclient.so\" \"${STEAMCMDDIR}/steamservice.so\" \
+        && mkdir -p \"${HOMEDIR}/.steam/sdk32\" \
+        && ln -s \"${STEAMCMDDIR}/linux32/steamclient.so\" \"${HOMEDIR}/.steam/sdk32/steamclient.so\" \
+        && ln -s \"${STEAMCMDDIR}/linux32/steamcmd\" \"${STEAMCMDDIR}/linux32/steam\" \
+        && mkdir -p \"${HOMEDIR}/.steam/sdk64\" \
+        && ln -s \"${STEAMCMDDIR}/linux64/steamclient.so\" \"${HOMEDIR}/.steam/sdk64/steamclient.so\" \
+        && ln -s \"${STEAMCMDDIR}/linux64/steamcmd\" \"${STEAMCMDDIR}/linux64/steam\" \
+        && ln -s \"${STEAMCMDDIR}/steamcmd.sh\" \"${STEAMCMDDIR}/steam.sh\"" \
 	# Symlink steamclient.so; So misconfigured dedicated servers can find it
  	&& ln -s "${STEAMCMDDIR}/linux64/steamclient.so" "/usr/lib/x86_64-linux-gnu/steamclient.so" \
 	&& rm -rf /var/lib/apt/lists/*
 
-FROM build_stage AS bookworm-root
-WORKDIR ${STEAMCMDDIR}
-
 ###########################################################
 # Dockerfile that builds a Core Keeper Gameserver
 ###########################################################
-FROM bookworm-root
+FROM build_stage
 
-LABEL maintainer="leandro.martin@protonmail.com"
+WORKDIR ${STEAMCMDDIR}
 
 ENV STEAMAPPID 1007
 ENV STEAMAPPID_TOOL 1963720
 ENV STEAMAPP core-keeper
-ENV STEAMAPPDIR "${HOMEDIR}/${STEAMAPP}-dedicated"
-ENV STEAMAPPDATADIR "${HOMEDIR}/${STEAMAPP}-data"
+ENV STEAMAPPDIR "${HOMEDIR}/server"
+ENV STEAMAPPDATADIR "${HOMEDIR}/data"
 ENV DLURL https://raw.githubusercontent.com/escapingnetwork/core-keeper-dedicated
 
 COPY ./entry.sh ${HOMEDIR}/entry.sh
@@ -75,12 +65,9 @@ RUN set -x \
 	&& mkdir -p "${STEAMAPPDATADIR}" \
 	&& chmod +x "${HOMEDIR}/entry.sh" \
 	&& chmod +x "${HOMEDIR}/launch.sh" \
-	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${HOMEDIR}/launch.sh" "${STEAMAPPDIR}" "${STEAMAPPDATADIR}" \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /tmp/.X11-unix \
-	&& chown -R "${USER}:${USER}" /tmp/.X11-unix
-
+RUN mkdir /tmp/.X11-unix
 
 ENV WORLD_INDEX=0 \
 	WORLD_NAME="Core Keeper Server" \
@@ -92,9 +79,6 @@ ENV WORLD_INDEX=0 \
 	SEASON=-1 \
 	SERVER_IP="" \
     SERVER_PORT=""
-
-# Switch to user
-USER ${USER}
 
 # Switch to workdir
 WORKDIR ${HOMEDIR}
