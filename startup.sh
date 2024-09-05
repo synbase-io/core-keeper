@@ -1,8 +1,13 @@
 #!/bin/bash
 bash "/usr/bin/steamcmd +force_install_dir ${SERVERDIR} +login anonymous +app_update 1007 validate +app_update 1963720 validate +quit"
 
+echo "x1"
+
 # Switch to workdir
 cd "${SERVERDIR}"
+
+echo "x2"
+echo "${SERVERDIR}"
 
 xvfbpid=""
 ckpid=""
@@ -24,6 +29,8 @@ set -m
 
 rm -f /tmp/.X99-lock
 
+echo "x3"
+
 Xvfb :99 -screen 0 1x1x24 -nolisten tcp &
 xvfbpid=$!
 
@@ -44,9 +51,13 @@ until [ $retry_count -gt $max_retries ]; do
     fi done
   if [ $xvfb_test == 255 ]; then exit 255; fi
 
+echo "x4"
+
 rm -f GameID.txt
 
 chmod +x ./CoreKeeperServer
+
+echo "x5"
 
 #Build Parameters
 declare -a params
@@ -61,6 +72,7 @@ if [ ! -z "${SEASON}" ]; then params=( "${params[@]}" -season "${SEASON}" ); fi
 if [ ! -z "${SERVER_IP}" ]; then params=( "${params[@]}" -ip "${SERVER_IP}" ); fi
 if [ ! -z "${SERVER_PORT}" ]; then params=( "${params[@]}" -port "${SERVER_PORT}" ); fi
 
+echo "x6"
 echo "${params[@]}"
 
 DISPLAY=:99 LD_LIBRARY_PATH="$LD_LIBRARY_PATH:../Steamworks SDK Redist/linux64/" ./CoreKeeperServer "${params[@]}" &
